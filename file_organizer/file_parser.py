@@ -26,27 +26,28 @@ UNKNOWN = set()
 def get_extension(name: str) -> str:
     return Path(name).suffix[1:].upper()  # suffix[1:] -> .jpg -> jpg
 
+
 def scan(folder: Path):
     for item in folder.iterdir():
-        # Робота з папкою
-        if item.is_dir():  # перевіряємо чи обєкт папка
+        # Work with folder
+        if item.is_dir():  # Check if item is folder
             if item.name not in ('archives', 'video', 'audio', 'documents', 'images', 'MY_OTHER'):
                 FOLDERS.append(item)
                 scan(item)
             continue
 
-        # Робота з файлом
-        extension = get_extension(item.name)  # беремо розширення файлу
-        full_name = folder / item.name  # беремо повний шлях до файлу
+        # Work with file
+        extension = get_extension(item.name)  # Get file extension
+        full_name = folder / item.name  # Get full path to file
         if not extension:
             MY_OTHER.append(full_name)
         else:
-            try:
-                REGISTER_EXTENSION[extension]
+            if REGISTER_EXTENSION.get(extension) != '':
                 EXTENSIONS.add(extension)
-            except KeyError:
+            else:
                 UNKNOWN.add(extension)  # .mp4, .mov, .avi
                 MY_OTHER.append(full_name)
+
 
 if __name__ == '__main__':
     folder_process = sys.argv[1]
@@ -56,9 +57,5 @@ if __name__ == '__main__':
     print(f'Images png: {PNG_IMAGES}')
     print(f'AUDIO mp3: {MP3_AUDIO}')
     print(f'Archives zip: {ARCHIVES}')
-
     print(f'EXTENSIONS: {EXTENSIONS}')
     print(f'UNKNOWN: {UNKNOWN}')
-
-
-
