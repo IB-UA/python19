@@ -24,21 +24,17 @@ def handle_archive(file_name: Path, target_folder: Path):
 
 def main(folder: Path):
     file_parser.scan(folder)
-    for file in file_parser.JPEG_IMAGES:
-        handle_media(file, folder / 'images' / 'JPEG')
-    for file in file_parser.JPG_IMAGES:
-        handle_media(file, folder / 'images' / 'JPG')
-    for file in file_parser.PNG_IMAGES:
-        handle_media(file, folder / 'images' / 'PNG')
-    for file in file_parser.SVG_IMAGES:
-        handle_media(file, folder / 'images' / 'SVG')
-    for file in file_parser.MP3_AUDIO:
-        handle_media(file, folder / 'audio' / 'MP3_AUDIO')
+    for group_name in file_parser.REGISTERED_EXTENSIONS.keys():
+        group = file_parser.REGISTERED_EXTENSIONS.get(group_name)
+        category_name = group.get('category')
+        for file_name in group.get('file_names'):
+            if category_name == 'archives':
+                handle_archive(file_name, folder / category_name / group_name)
+            else:
+                handle_media(file_name, folder / category_name / group_name)
+
     for file in file_parser.MY_OTHER:
         handle_media(file, folder / 'MY_OTHER')
-
-    for file in file_parser.ARCHIVES:
-        handle_archive(file, folder / 'ARCHIVES')
 
     for folder in file_parser.FOLDERS[::-1]:
         # Remove empty folders after sorting

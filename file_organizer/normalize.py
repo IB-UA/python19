@@ -4,8 +4,9 @@ UKR_CYRILLIC_SYMBOLS = (
     'а',    'б',    'в',    'г',    'ґ',    'д',    'е',    'є',    'ж',    'з',    'и',    'і',    'ї',    'й',    'к',
     'л',    'м',    'н',    'о',    'п',    'р',    'с',    'т',    'у',    'ф',    'х',    'ц',    'ч',    'ш',
     'щ',    'ь',    'ю',    'я',
-    'Є',    'Ї',    'Й'    'Ю',    'Я'  # set of symbols that has other transliteration in case they start the word
+    'Є',    'Ї',    'Й',    'Ю',    'Я'  # set of symbols that has other transliteration in case they start the word
 )
+
 UKR_CYRILLIC_SYMBOLS_TRANSLITERATION = (
     'a',    'b',    'v',    'h',    'g',    'd',    'e',    'ie',   'zh',   'z',    'y',    'i',    'i',    'i',    'k',
     'l',    'm',    'n',    'o',    'p',    'r',    's',    't',    'u',    'f',    'kh',   'ts',   'ch',   'sh',

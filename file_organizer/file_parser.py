@@ -1,37 +1,39 @@
 import sys
 from pathlib import Path
 
-JPEG_IMAGES = []
-JPG_IMAGES = []
-PNG_IMAGES = []
-SVG_IMAGES = []
-MP3_AUDIO = []
-MY_OTHER = []
-ARCHIVES = []
-
-REGISTER_EXTENSION = {
-    'JPEG': JPEG_IMAGES,
-    'JPG': JPG_IMAGES,
-    'PNG': PNG_IMAGES,
-    'SVG': SVG_IMAGES,
-    'MP3': MP3_AUDIO,
-    'ZIP': ARCHIVES,
+GROUPS_BY_CATEGORIES = {
+    'archives': ('ZIP', 'GZ', 'TAR'),
+    'video': ('AVI', 'MP4', 'MOV', 'MKV'),
+    'audio': ('MP3', 'OGG', 'WAV', 'AMR'),
+    'documents': ('DOC', 'DOCX', 'TXT', 'PDF', 'XLSX', 'PPTX'),
+    'images': ('JPEG', 'PNG', 'JPG', 'SVG'),
+    'MY_OTHER': ()
 }
+
+REGISTERED_EXTENSIONS = {}
+
+for category in GROUPS_BY_CATEGORIES.keys():
+    for group in GROUPS_BY_CATEGORIES[category]:
+        REGISTERED_EXTENSIONS[group] = {
+            'category': category,
+            'file_names': []
+        }
 
 FOLDERS = []
 EXTENSIONS = set()
 UNKNOWN = set()
+MY_OTHER = []
 
 
 def get_extension(name: str) -> str:
-    return Path(name).suffix[1:].upper()  # suffix[1:] -> .jpg -> jpg
+    return Path(name).suffix[1:].upper()  # suffix[1:] -> .jpg -> jpg -> JPG
 
 
 def scan(folder: Path):
     for item in folder.iterdir():
         # Work with folder
         if item.is_dir():  # Check if item is folder
-            if item.name not in ('archives', 'video', 'audio', 'documents', 'images', 'MY_OTHER'):
+            if item.name not in GROUPS_BY_CATEGORIES.keys():
                 FOLDERS.append(item)
                 scan(item)
             continue
@@ -42,7 +44,8 @@ def scan(folder: Path):
         if not extension:
             MY_OTHER.append(full_name)
         else:
-            if REGISTER_EXTENSION.get(extension) != '':
+            if REGISTERED_EXTENSIONS.get(extension):
+                REGISTERED_EXTENSIONS.get(extension).get('file_names').append(full_name)
                 EXTENSIONS.add(extension)
             else:
                 UNKNOWN.add(extension)  # .mp4, .mov, .avi
@@ -52,10 +55,3 @@ def scan(folder: Path):
 if __name__ == '__main__':
     folder_process = sys.argv[1]
     scan(Path(folder_process))
-    print(f'Images jpeg: {JPEG_IMAGES}')
-    print(f'Images jpg: {JPG_IMAGES}')
-    print(f'Images png: {PNG_IMAGES}')
-    print(f'AUDIO mp3: {MP3_AUDIO}')
-    print(f'Archives zip: {ARCHIVES}')
-    print(f'EXTENSIONS: {EXTENSIONS}')
-    print(f'UNKNOWN: {UNKNOWN}')
