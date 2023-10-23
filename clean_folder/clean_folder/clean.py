@@ -1,8 +1,8 @@
 from pathlib import Path
 import shutil
 import sys
-import file_parser
-from normalize import normalize
+from .file_parser import scan, REGISTERED_EXTENSIONS, MY_OTHER, FOLDERS
+from .normalize import normalize
 
 
 def handle_media(file_name: Path, target_folder: Path):
@@ -22,10 +22,11 @@ def handle_archive(file_name: Path, target_folder: Path):
     file_name.unlink()
 
 
-def main(folder: Path):
-    file_parser.scan(folder)
-    for group_name in file_parser.REGISTERED_EXTENSIONS.keys():
-        group = file_parser.REGISTERED_EXTENSIONS.get(group_name)
+def clean(path: str):
+    folder = (Path.cwd() / Path(path)).resolve()
+    scan(folder)
+    for group_name in REGISTERED_EXTENSIONS.keys():
+        group = REGISTERED_EXTENSIONS.get(group_name)
         category_name = group.get('category')
         for file_name in group.get('file_names'):
             if category_name == 'archives':
@@ -33,10 +34,10 @@ def main(folder: Path):
             else:
                 handle_media(file_name, folder / category_name / group_name)
 
-    for file in file_parser.MY_OTHER:
+    for file in MY_OTHER:
         handle_media(file, folder / 'MY_OTHER')
 
-    for folder in file_parser.FOLDERS[::-1]:
+    for folder in FOLDERS[::-1]:
         # Remove empty folders after sorting
         try:
             folder.rmdir()
@@ -45,5 +46,7 @@ def main(folder: Path):
 
 
 if __name__ == '__main__':
-    folder_process = Path(sys.argv[1])
-    main(folder_process.resolve())
+    if sys.argv[1]:
+        clean(sys.argv[1])
+    else:
+        print("Path to folder not provided")
