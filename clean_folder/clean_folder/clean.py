@@ -22,7 +22,7 @@ def handle_archive(file_name: Path, target_folder: Path):
     file_name.unlink()
 
 
-def clean(path: str):
+def main(path: str):
     folder = (Path.cwd() / Path(path)).resolve()
     scan(folder)
     for group_name in REGISTERED_EXTENSIONS.keys():
@@ -45,8 +45,12 @@ def clean(path: str):
             print(f'Error during remove folder {folder}')
 
 
-if __name__ == '__main__':
+def clean():
     if sys.argv[1]:
-        clean(sys.argv[1])
+        main(sys.argv[1])
     else:
         print("Path to folder not provided")
+
+
+if __name__ == '__main__':
+    clean()

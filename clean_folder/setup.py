@@ -6,7 +6,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
   name='clean_folder_ib',
-  version='1.0.0',
+  version='1.0.1',
   description='Utility tool for organizing and structuring files in selected folder',
   author='Ievgen Bardadym',
   author_email='ievgen.bardadym@gmail.coim',
