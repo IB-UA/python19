@@ -1,9 +1,18 @@
 from collections import UserDict
+from datetime import datetime, date
 
 
 class Field:
     def __init__(self, value):
         self.value = value
+
+    @property
+    def value(self):
+        return self.__value
+
+    @value.setter
+    def value(self, value):
+        self.__value = value
 
     def __str__(self):
         return str(self.value)
@@ -13,11 +22,30 @@ class Name(Field):
     pass
 
 
+class Birthday(Field):
+    @property
+    def value(self):
+        return self.__value
+
+    @value.setter
+    def value(self, value):
+        if isinstance(value, date):
+            self.__value = value
+        else:
+            raise ValueError("Value should be a date object")
+
+
 class Phone(Field):
-    def __init__(self, value):
-        if not self.is_valid(value):
-            raise ValueError
-        super().__init__(value)
+    @property
+    def value(self):
+        return self.__value
+
+    @value.setter
+    def value(self, value):
+        if self.is_valid(value):
+            self.__value = value
+        else:
+            raise ValueError("The string should contain only digits and its length equal 10")
 
     @staticmethod
     def is_valid(phone_number: str):
@@ -25,9 +53,11 @@ class Phone(Field):
 
 
 class Record:
-    def __init__(self, name):
+    def __init__(self, name, birthday=None):
         self.name = Name(name)
         self.phones = []
+        if birthday is not None:
+            self.birthday = Birthday(birthday)
 
     def add_phone(self, phone_number: str):
         self.phones.append(Phone(phone_number))
@@ -46,6 +76,16 @@ class Record:
             raise ValueError
         phone.value = new_number
 
+    def days_to_birthday(self):
+        if self.birthday is None:
+            return None
+        current_date: date = datetime.now().date()
+        current_year: int = current_date.year
+        current_year_birthday: date = self.birthday.value.replace(year=current_year)
+        if current_year_birthday < current_date:
+            current_year_birthday = current_year_birthday.replace(year=(current_year_birthday.year + 1))
+        return (current_year_birthday - current_date).days
+
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
 
@@ -59,3 +99,14 @@ class AddressBook(UserDict):
 
     def find(self, name: str) -> Record:
         return self.data.get(name)
+
+    def iterator(self, item_number):
+        counter = 0
+        result = ''
+        for item, record in self.data.items():
+            result += f'{item}: {record}'
+            counter += 1
+            if counter >= item_number:
+                yield result
+                counter = 0
+                result = ''
