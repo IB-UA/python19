@@ -1,5 +1,9 @@
+import re
 from collections import UserDict
 from datetime import datetime, date
+from pathlib import Path
+from pickle import dump, load
+from atexit import register
 
 
 class Field:
@@ -91,6 +95,23 @@ class Record:
 
 
 class AddressBook(UserDict):
+    path = Path("addressbook.bin")
+    instance = None
+    restored_data = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls.instance is None:
+            cls.instance = super(AddressBook, cls).__new__(cls)
+            cls.instance.restored_data = cls.instance.load()
+            register(cls.instance.dump)
+        return cls.instance
+
+    def __init__(self):
+        super().__init__()
+        if self.restored_data is not None:
+            self.data.update(self.restored_data)
+            self.restored_data = None
+
     def add_record(self, record: Record):
         self.data[record.name.value] = record
 
@@ -102,11 +123,32 @@ class AddressBook(UserDict):
 
     def iterator(self, item_number):
         counter = 0
-        result = ''
+        result = []
         for item, record in self.data.items():
-            result += f'{item}: {record}'
+            result.append(f'{item}: {record}\n')
             counter += 1
             if counter >= item_number:
-                yield result
+                yield ''.join(result)
                 counter = 0
-                result = ''
+                result = []
+        return ''.join(result)
+
+    def dump(self):
+        with open(self.path, 'wb') as fw:
+            dump(self.data, fw)
+
+    def load(self):
+        if not self.path.is_file():
+            return None
+        with open(self.path, 'rb') as fr:
+            return load(fr)
+
+    def find_by_string(self, term):
+        search_result = []
+        for record in self.data.values():
+            for field in [record.name, *record.phones]:
+                if re.search(term, field.value, re.IGNORECASE):
+                    search_result.append(str(record))
+                    break
+
+        return "\n".join(search_result)
